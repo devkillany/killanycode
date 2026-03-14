@@ -1,0 +1,18 @@
+{
+  "app_name": "KillanyCode",
+  "footer_text": "Developed by Eng. Mohamed Elkillany",
+  "nav_home": "Home",
+  "nav_languages": "Languages",
+  "nav_compiler": "Compiler",
+  "nav_lessons": "Lessons",
+  "nav_dashboard": "Dashboard",
+  "ai_explanation": "AI Explanation",
+  "run_code": "Run Code",
+  "improve_code": "Improve Code",
+  "stats": "Statistics",
+  "categories": "Categories",
+  "snippets": "Snippets",
+  "search": "Search...",
+  "login": "Login",
+  "logout": "Logout"
+}

@@ -1,0 +1,18 @@
+{
+  "app_name": "KillanyCode",
+  "footer_text": "تطوير م. محمد الكيلاني",
+  "nav_home": "الرئيسية",
+  "nav_languages": "اللغات",
+  "nav_compiler": "المحرر",
+  "nav_lessons": "الدروس",
+  "nav_dashboard": "لوحة التحكم",
+  "ai_explanation": "شرح الذكاء الاصطناعي",
+  "run_code": "تشغيل الكود",
+  "improve_code": "تحسين الكود",
+  "stats": "الإحصائيات",
+  "categories": "التصنيفات",
+  "snippets": "قصاصات الكود",
+  "search": "بحث...",
+  "login": "تسجيل الدخول",
+  "logout": "تسجيل الخروج"
+}

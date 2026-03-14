@@ -1,0 +1,73 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  snippets  Snippet[]
+}
+
+model Language {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  icon      String?
+  createdAt DateTime   @default(now())
+  categories Category[]
+  snippets   Snippet[]
+  lessons    Lesson[]
+}
+
+model Category {
+  id         String   @id @default(uuid())
+  name       String
+  languageId String
+  language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  snippets   Snippet[]
+}
+
+model Snippet {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  code        String
+  languageId  String
+  categoryId  String
+  userId      String?
+  tags        String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  language    Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model Lesson {
+  id         String   @id @default(uuid())
+  title      String
+  content    String   // Markdown or HTML content
+  languageId String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  language   Language? @relation(fields: [languageId], references: [id])
+}
+
+model CompilerRun {
+  id        String   @id @default(uuid())
+  userId    String?
+  language  String
+  code      String
+  output    String
+  createdAt DateTime @default(now())
+}
