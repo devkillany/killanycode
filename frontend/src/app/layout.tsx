@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Cairo } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Navbar } from "@/components/layout/Navbar";
@@ -8,7 +8,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import AIChatWidget from '@/components/ai/AIChatWidget';
 import PageTransition from "@/components/layout/PageTransition";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const cairo = Cairo({ subsets: ["arabic"], variable: "--font-arabic", weight: ["400", "500", "600", "700", "800", "900"] });
 
 export const metadata: Metadata = {
   title: "KillanyCode - Modern Snippet Manager",
@@ -22,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${cairo.variable} antialiased font-sans`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
