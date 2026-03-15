@@ -37,14 +37,42 @@ async function main() {
   ];
 
   for (const lang of languages) {
-    await prisma.language.upsert({
+    const createdLang = await prisma.language.upsert({
       where: { name: lang.name },
       update: {},
       create: lang,
     });
+
+    if (lang.name === 'JavaScript') {
+      const cat = await prisma.category.create({
+        data: {
+          name: 'Fundamentals',
+          languageId: createdLang.id,
+        }
+      });
+
+      await prisma.snippet.create({
+        data: {
+          title: 'Arrow Functions',
+          description: 'Modern way to write functions in JS',
+          code: 'const add = (a, b) => a + b;',
+          languageId: createdLang.id,
+          categoryId: cat.id,
+          tags: 'es6,basics',
+        }
+      });
+
+      await prisma.lesson.create({
+        data: {
+          title: 'Understanding Async/Await',
+          content: '# Async Await\n\nAsync/Await is a better way to handle promises...',
+          languageId: createdLang.id,
+        }
+      });
+    }
   }
 
-  console.log('Languages seeded successfully.');
+  console.log('Database seeded with real content.');
 }
 
 main()

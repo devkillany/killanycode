@@ -1,3 +1,5 @@
+'use client';
+
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -90,9 +92,49 @@ export default function Home() {
           />
         </motion.div>
 
-        <motion.div variants={itemVariants} className="w-full max-w-5xl mt-24">
-          <div className="rounded-xl bg-muted/50 p-8 border">
-            <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+        <motion.div variants={itemVariants} className="w-full max-w-5xl mt-16 space-y-24">
+          {/* Detailed Features / How it Works */}
+          <section id="guide" className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center py-20 border-t">
+            <div className="text-left space-y-6">
+              <h2 className="text-3xl font-bold tracking-tight">How to Study with KillanyCode?</h2>
+              <div className="space-y-4 text-muted-foreground">
+                <p>
+                  1. <strong className="text-foreground">Browse Lessons:</strong> Head to the lessons section to find structured tutorials on your favorite languages.
+                </p>
+                <p>
+                  2. <strong className="text-foreground">Practice in Compiler:</strong> Don't just read—execute! Every lesson is linked to our multi-language compiler.
+                </p>
+                <p>
+                  3. <strong className="text-foreground">AI Assistance:</strong> Use the AI chat to ask questions about complex code or get instant summaries of long lessons.
+                </p>
+                <p>
+                  4. <strong className="text-foreground">Save Snippets:</strong> Found a useful block of code? Save it to your personal library for future reference.
+                </p>
+              </div>
+              <Link href="/lessons">
+                <Button className="mt-4 gap-2">Start Learning Now <Rocket className="h-4 w-4" /></Button>
+              </Link>
+            </div>
+            <div className="relative aspect-video rounded-3xl overflow-hidden border-4 border-primary/20 bg-gradient-to-br from-primary/10 to-blue-500/10 flex items-center justify-center p-8">
+               <div className="p-8 rounded-2xl bg-background shadow-2xl space-y-4 w-full">
+                  <div className="flex gap-2">
+                    <div className="h-3 w-3 rounded-full bg-red-500" />
+                    <div className="h-3 w-3 rounded-full bg-yellow-500" />
+                    <div className="h-3 w-3 rounded-full bg-green-500" />
+                  </div>
+                  <pre className="text-sm font-mono text-primary animate-pulse">
+                    {`async function learn(topic) {
+  const code = await fetch(topic);
+  return executeWithAI(code);
+}`}
+                  </pre>
+               </div>
+            </div>
+          </section>
+
+          {/* Stats Bar */}
+          <div className="rounded-3xl bg-muted/50 p-12 border backdrop-blur-md">
+            <div className="grid grid-cols-2 gap-12 md:grid-cols-4">
               <StatItem label="Active Languages" value="60+" />
               <StatItem label="Code Snippets" value="1.2k+" />
               <StatItem label="Happy Developers" value="500+" />

@@ -10,11 +10,8 @@ import {
   MessageSquare, 
   X, 
   Send, 
-  Sparkles, 
   Bot, 
-  User,
-  MinusCircle,
-  Maximize2
+  User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,7 +21,7 @@ interface Message {
   content: string;
 }
 
-export function AIChatWidget() {
+export default function AIChatWidget() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');

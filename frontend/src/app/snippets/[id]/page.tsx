@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -19,10 +19,11 @@ import {
   User
 } from 'lucide-react';
 import Link from 'next/link';
-import { MOCK_SNIPPETS, MOCK_LANGUAGES } from '@/lib/mock-data';
 import Editor from '@monaco-editor/react';
 import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
+import api from '@/lib/api';
+import { Loader2 } from 'lucide-react';
 
 export default function SnippetDetailsPage() {
   const { id } = useParams();
@@ -31,9 +32,30 @@ export default function SnippetDetailsPage() {
   const [copied, setCopied] = useState(false);
   const [isExplaining, setIsExplaining] = useState(false);
   const [explanation, setExplanation] = useState<string | null>(null);
+  const [snippet, setSnippet] = useState<{
+    title: string;
+    description: string;
+    code: string;
+    languageId: string;
+    createdAt: string;
+    language?: { name: string };
+    tags?: string;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const snippet = useMemo(() => MOCK_SNIPPETS.find(s => s.id === id), [id]);
-  const language = useMemo(() => MOCK_LANGUAGES.find(l => l.id === snippet?.languageId), [snippet]);
+  useEffect(() => {
+    const fetchSnippet = async () => {
+      try {
+        const response = await api.get(`/snippets/${id}`);
+        setSnippet(response.data);
+      } catch (error) {
+        console.error('Failed to fetch snippet:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (id) fetchSnippet();
+  }, [id]);
 
   const copyToClipboard = () => {
     if (snippet) {
@@ -44,25 +66,40 @@ export default function SnippetDetailsPage() {
   };
 
   const handleAIExplain = async () => {
+    if (!snippet) return;
     setIsExplaining(true);
-    // TODO: Connect to backend /api/ai/explain
-    // For now, mock a delay and response
-    setTimeout(() => {
-      setExplanation("This code filters an array named `nums` to only include elements over 10. It uses the `.filter()` method, which creates a new array with all elements that pass the test implemented by the provided function.");
+    try {
+      const response = await api.post('/ai/explain', {
+        code: snippet.code,
+        language: snippet.language?.name || 'Javascript'
+      });
+      setExplanation(response.data.explanation);
+    } catch (error) {
+      console.error('AI explanation failed:', error);
+      setExplanation("Sorry, I couldn't generate an explanation at this time.");
+    } finally {
       setIsExplaining(false);
-    }, 1500);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="container flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!snippet) {
     return (
       <div className="container py-20 text-center">
         <h2 className="text-2xl font-bold">Snippet not found</h2>
-              <Link 
-                href="/languages" 
-                className={cn(buttonVariants({ variant: 'default' }), "mt-4")}
-              >
-                Back to Languages
-              </Link>
+        <Link 
+          href="/languages" 
+          className={cn(buttonVariants({ variant: 'default' }), "mt-4")}
+        >
+          Back to Languages
+        </Link>
       </div>
     );
   }
@@ -75,7 +112,7 @@ export default function SnippetDetailsPage() {
           href={`/languages/${snippet.languageId}`} 
           className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), "w-fit gap-1")}
         >
-          <ChevronLeft className="h-4 w-4" /> Back to {language?.name}
+          <ChevronLeft className="h-4 w-4" /> Back to {snippet.language?.name}
         </Link>
 
         {/* Title and Stats */}
@@ -87,10 +124,10 @@ export default function SnippetDetailsPage() {
                 <User className="h-4 w-4" /> Eng. Mohamed Elkillany
               </div>
               <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" /> 2 hours ago
+                <Clock className="h-4 w-4" /> {new Date(snippet.createdAt).toLocaleDateString()}
               </div>
               <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
-                {snippet.aiBadge}
+                Optimized
               </Badge>
             </div>
           </div>
@@ -110,17 +147,17 @@ export default function SnippetDetailsPage() {
         {/* Code Block */}
         <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
           <div className="bg-muted/50 px-4 py-2 border-b flex justify-between items-center">
-            <span className="text-xs font-mono uppercase tracking-widest">{language?.name}</span>
+            <span className="text-xs font-mono uppercase tracking-widest">{snippet.language?.name}</span>
             <Link href="/compiler">
               <Button size="xs" variant="secondary" className="h-7 text-[10px] uppercase font-bold gap-1">
                 <Play className="h-3 w-3" /> Run in Compiler
               </Button>
             </Link>
           </div>
-          <div className="h-[300px]">
+          <div className="h-[400px]">
             <Editor
               height="100%"
-              defaultLanguage={snippet.languageId === 'js' ? 'javascript' : 'plaintext'}
+              language={snippet.language?.name?.toLowerCase() || 'javascript'}
               defaultValue={snippet.code}
               theme={theme === 'dark' ? 'vs-dark' : 'light'}
               options={{

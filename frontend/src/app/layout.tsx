@@ -4,7 +4,9 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { AIChatWidget } from "@/components/ai/AIChatWidget";
+import { AuthProvider } from "@/context/AuthContext";
+import AIChatWidget from '@/components/ai/AIChatWidget';
+import PageTransition from "@/components/layout/PageTransition";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,12 +29,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="relative flex min-h-screen flex-col">
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <AIChatWidget />
-          </div>
+          <AuthProvider>
+            <div className="relative flex min-h-screen flex-col">
+              <Navbar />
+              <main className="flex-1">
+                <PageTransition>{children}</PageTransition>
+              </main>
+              <Footer />
+              <AIChatWidget />
+            </div>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

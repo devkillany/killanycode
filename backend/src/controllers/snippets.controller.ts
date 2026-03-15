@@ -57,7 +57,7 @@ export const createSnippet = async (req: AuthRequest, res: Response): Promise<vo
         code,
         languageId,
         categoryId,
-        tags: tags || [],
+        tags: Array.isArray(tags) ? tags.join(',') : (tags || ''),
         userId,
       },
       include: { language: true, category: true }

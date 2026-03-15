@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -19,64 +19,111 @@ import {
   Settings, 
   ChevronDown,
   Terminal,
-  Cpu
+  Cpu,
+  Loader2
 } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
-import { MOCK_LANGUAGES } from '@/lib/mock-data';
+import api from '@/lib/api';
 
 export default function CompilerPage() {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const [language, setLanguage] = useState(MOCK_LANGUAGES[0]);
+  const [languages, setLanguages] = useState<any[]>([]);
+  const [language, setLanguage] = useState<any>(null);
   const [code, setCode] = useState('// Write your code here...\nconsole.log("Hello, KillanyCode!");');
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [isAISuggesting, setIsAISuggesting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const response = await api.get('/languages');
+        setLanguages(response.data);
+        if (response.data.length > 0) {
+          setLanguage(response.data[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch languages:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchLanguages();
+  }, []);
 
   const handleRunCode = async () => {
+    if (!language) return;
     setIsRunning(true);
     setOutput('Compiling and running...\n');
     
-    // Simulate API call to Piston
-    setTimeout(() => {
-      setOutput(prev => prev + 'Hello, KillanyCode!\n\nProgram exited with code 0');
+    try {
+      const response = await api.post('/compiler/run', {
+        language: language.name.toLowerCase(),
+        code: code,
+        version: language.version || 'latest'
+      });
+      setOutput(response.data.output || response.data.error || 'No output');
+    } catch (error: any) {
+      console.error('Run failed:', error);
+      setOutput('Error connecting to compiler service: ' + (error.response?.data?.error || error.message));
+    } finally {
       setIsRunning(false);
-    }, 1000);
+    }
   };
 
   const handleClearOutput = () => setOutput('');
 
-  const handleAIImprove = () => {
+  const handleAIImprove = async () => {
+    if (!language) return;
     setIsAISuggesting(true);
-    setTimeout(() => {
-      // Mock suggestion
-      setOutput(prev => prev + '\n\n[AI Suggestion]: Consider using typed variables for better performance in larger projects.');
+    try {
+      const response = await api.post('/ai/explain', {
+        code,
+        language: language.name.toLowerCase()
+      });
+      setOutput(prev => prev + '\n\n[AI Suggestion]: ' + response.data.explanation);
+    } catch (error: any) {
+      console.error('AI Suggestion failed:', error);
+      setOutput(prev => prev + '\n\n[AI Error]: Failed to get suggestion.');
+    } finally {
       setIsAISuggesting(false);
-    }, 800);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] p-4 gap-4 overflow-hidden">
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-4 bg-muted/30 p-2 rounded-lg border">
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger render={<Button variant="outline" size="sm" className="gap-2" />}>
-              <span className={cn("font-bold text-xs uppercase", language.color)}>{language.icon}</span>
-              {language.name}
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-[200px]">
-              {MOCK_LANGUAGES.map((lang) => (
-                <DropdownMenuItem key={lang.id} onClick={() => setLanguage(lang)}>
-                  <span className={cn("mr-2 font-bold text-[10px]", lang.color)}>{lang.icon}</span>
-                  {lang.name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {language && (
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<Button variant="outline" size="sm" className="gap-2" />}>
+                <span className="font-bold text-xs uppercase">{language.icon?.substring(0, 2).toUpperCase() || '??'}</span>
+                {language.name}
+                <ChevronDown className="h-4 w-4 opacity-50" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[200px]">
+                {languages.map((lang) => (
+                  <DropdownMenuItem key={lang.id} onClick={() => setLanguage(lang)}>
+                    <span className="mr-2 font-bold text-[10px]">{lang.icon?.substring(0, 2) || '??'}</span>
+                    {lang.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
           <Button variant="outline" size="sm" className="gap-2">
             <Settings className="h-4 w-4" />

@@ -1,6 +1,6 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 generator client {
@@ -44,7 +44,7 @@ model Snippet {
   languageId  String
   categoryId  String
   userId      String?
-  tags        String[]
+  tags        String   // SQLite doesn't support String[], using stringified JSON or comma-separated
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

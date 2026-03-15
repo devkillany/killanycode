@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,33 +8,40 @@ import { Input } from '@/components/ui/input';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Code2, ChevronRight, Binary, FileCode2 } from 'lucide-react';
+import { Search, Code2, ChevronRight, Binary, FileCode2, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { MOCK_LANGUAGES, MOCK_CATEGORIES, MOCK_SNIPPETS } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
+import api from '@/lib/api';
 
 export default function LanguageDetailsPage() {
   const { id } = useParams();
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [language, setLanguage] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const language = useMemo(() => MOCK_LANGUAGES.find(l => l.id === id), [id]);
-  const categories = useMemo(() => MOCK_CATEGORIES.filter(c => c.languageId === id), [id]);
-  
-  const snippets = useMemo(() => {
-    let filtered = MOCK_SNIPPETS.filter(s => s.languageId === id);
-    if (selectedCategory) {
-      filtered = filtered.filter(s => s.categoryId === selectedCategory);
-    }
-    if (search) {
-      filtered = filtered.filter(s => 
-        s.title.toLowerCase().includes(search.toLowerCase()) ||
-        s.description.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-    return filtered;
-  }, [id, selectedCategory, search]);
+  useEffect(() => {
+    const fetchLanguage = async () => {
+      try {
+        const response = await api.get(`/languages/${id}`);
+        setLanguage(response.data);
+      } catch (error) {
+        console.error('Failed to fetch language details:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (id) fetchLanguage();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="container flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!language) {
     return (
@@ -49,6 +56,19 @@ export default function LanguageDetailsPage() {
       </div>
     );
   }
+
+  const categories = language.categories || [];
+  const snippets = (language.snippets || []).filter((s: { title: string, description: string, categoryId: string }) => {
+    let matches = true;
+    if (selectedCategory) {
+      matches = s.categoryId === selectedCategory;
+    }
+    if (search && matches) {
+      matches = s.title.toLowerCase().includes(search.toLowerCase()) ||
+                s.description.toLowerCase().includes(search.toLowerCase());
+    }
+    return matches;
+  });
 
   return (
     <div className="container px-4 py-8 md:py-12">
@@ -88,7 +108,7 @@ export default function LanguageDetailsPage() {
             >
               All Snippets
             </Button>
-            {categories.map((cat) => (
+            {categories.map((cat: { id: string, name: string }) => (
               <Button 
                 key={cat.id}
                 variant={selectedCategory === cat.id ? "secondary" : "ghost"} 
@@ -103,7 +123,7 @@ export default function LanguageDetailsPage() {
           {/* Snippets List */}
           <div className="flex flex-col space-y-4">
             <AnimatePresence mode="popLayout">
-              {snippets.map((snippet) => (
+              {snippets.map((snippet: { id: string, title: string, description: string, tags: string }) => (
                 <motion.div
                   key={snippet.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -117,15 +137,15 @@ export default function LanguageDetailsPage() {
                         {snippet.title}
                       </CardTitle>
                       <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
-                        {snippet.aiBadge}
+                        Optimized
                       </Badge>
                     </CardHeader>
                     <CardContent>
                       <p className="text-muted-foreground mb-4">{snippet.description}</p>
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {snippet.tags.map(tag => (
+                        {snippet.tags?.split(',').map((tag: string) => (
                           <Badge key={tag} variant="secondary" className="text-[10px] uppercase font-bold">
-                            #{tag}
+                            #{tag.trim()}
                           </Badge>
                         ))}
                       </div>

@@ -12,9 +12,11 @@ import {
 import { Languages, Moon, Sun, Code2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 import '@/lib/i18n';
 
 export function Navbar() {
+  const { user, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const { setTheme } = useTheme();
 
@@ -22,6 +24,12 @@ export function Navbar() {
     i18n.changeLanguage(lng);
     document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lng;
+    // Update font family dynamically if needed, though Tailwind font-sans + font-arabic handles it.
+    if (lng === 'ar') {
+      document.body.style.fontFamily = 'var(--font-arabic)';
+    } else {
+      document.body.style.fontFamily = 'var(--font-sans)';
+    }
   };
 
   return (
@@ -83,12 +91,42 @@ export function Navbar() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link 
-            href="/dashboard" 
-            className={cn(buttonVariants({ variant: 'default', size: 'sm' }))}
-          >
-            {t('nav_dashboard')}
-          </Link>
+          <div className="h-6 w-px bg-border mx-2 hidden sm:block" />
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<Button variant="ghost" size="sm" className="gap-2 px-2" />}>
+                <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-primary">{user.name.substring(0, 1).toUpperCase()}</span>
+                </div>
+                <span className="hidden md:inline-block text-sm font-medium">{user.name.split(' ')[0]}</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem render={<Link href="/profile" className="cursor-pointer w-full" />}>My Profile</DropdownMenuItem>
+                {user.role === 'admin' || user.email === 'admin@killanycode.com' ? (
+                  <DropdownMenuItem render={<Link href="/dashboard" className="cursor-pointer w-full" />}>{t('nav_dashboard')}</DropdownMenuItem>
+                ) : null}
+                <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer" onClick={() => logout()}>
+                  Log Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link 
+                href="/login" 
+                className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), "hidden sm:flex")}
+              >
+                Sign In
+              </Link>
+              <Link 
+                href="/register" 
+                className={cn(buttonVariants({ variant: 'default', size: 'sm' }))}
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </nav>

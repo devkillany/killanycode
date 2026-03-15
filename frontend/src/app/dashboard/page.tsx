@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
@@ -25,8 +27,21 @@ import {
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SnippetManager } from '@/components/dashboard/SnippetManager';
+import { LessonManager } from '@/components/dashboard/LessonManager';
+import { LanguageManager } from '@/components/dashboard/LanguageManager';
+
 export default function DashboardPage() {
   const { t } = useTranslation();
+  const router = useRouter();
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('isAdminAuthenticated');
+    if (isAuthenticated !== 'true') {
+      router.push('/login');
+    }
+  }, [router]);
 
   return (
     <div className="container px-4 py-8 md:py-12">
@@ -36,67 +51,44 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
             <p className="text-muted-foreground">
-              Manage your content and monitor platform performance.
+              Manage your platform content and monitor performance.
             </p>
-          </div>
-          <div className="flex gap-2">
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" /> Add New Snippet
-            </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard title="Total Snippets" value="1,284" change="+12% from last month" icon={<FileCode className="h-4 w-4" />} />
-          <StatCard title="Active Users" value="2,350" change="+180.1% since yesterday" icon={<Users className="h-4 w-4" />} />
-          <StatCard title="Total Lessons" value="24" change="+2 from last month" icon={<GraduationCap className="h-4 w-4" />} />
-          <StatCard title="Page Views" value="45,231" change="+20.1% from last month" icon={<Eye className="h-4 w-4" />} />
+          <StatCard title="Platform Overview" value="Secure" change="All systems operational" icon={<LayoutDashboard className="h-4 w-4" />} />
+          <StatCard title="Admin Access" value="Granted" change="Logged in successfully" icon={<Users className="h-4 w-4" />} />
+          <StatCard title="Active Session" value="Now" change="Managing content" icon={<BarChart3 className="h-4 w-4" />} />
+          <StatCard title="System Mode" value="Active" change="CRUD functionality enabled" icon={<Settings className="h-4 w-4" />} />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          {/* Main Content Area */}
-          <Card className="col-span-full lg:col-span-4">
-            <CardHeader>
-              <CardTitle>Overview</CardTitle>
-            </CardHeader>
-            <CardContent className="pl-2">
-              <div className="h-[200px] flex items-center justify-center text-muted-foreground italic border-2 border-dashed rounded-lg mx-4">
-                Chart Placeholder (Chart.js / Recharts integration coming soon)
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions / Categories */}
-          <Card className="col-span-full lg:col-span-3">
-            <CardHeader>
-              <CardTitle>Quick Management</CardTitle>
-              <CardDescription>Direct access to content creation and editing.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-              <ManagementItem 
-                icon={<Globe className="h-5 w-5 text-blue-500" />}
-                title="Manage Languages"
-                description="Edit icons and display names for supported languages."
-              />
-              <ManagementItem 
-                icon={<FileCode className="h-5 w-5 text-yellow-500" />}
-                title="Manage Snippets"
-                description="Review, edit, or delete existing code snippets."
-              />
-              <ManagementItem 
-                icon={<GraduationCap className="h-5 w-5 text-green-500" />}
-                title="Manage Lessons"
-                description="Create new tutorials or update existing ones."
-              />
-              <ManagementItem 
-                icon={<Settings className="h-5 w-5 text-zinc-500" />}
-                title="Platform Settings"
-                description="Configure AI limits and general app preferences."
-              />
-            </CardContent>
-          </Card>
-        </div>
+        <Tabs defaultValue="snippets" className="space-y-4">
+          <TabsList className="bg-muted/50 p-1">
+            <TabsTrigger value="snippets" className="gap-2">
+              <FileCode className="h-4 w-4" /> Snippets
+            </TabsTrigger>
+            <TabsTrigger value="lessons" className="gap-2">
+              <GraduationCap className="h-4 w-4" /> Lessons
+            </TabsTrigger>
+            <TabsTrigger value="languages" className="gap-2">
+              <Globe className="h-4 w-4" /> Languages
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="snippets" className="space-y-4">
+            <SnippetManager />
+          </TabsContent>
+          
+          <TabsContent value="lessons" className="space-y-4">
+            <LessonManager />
+          </TabsContent>
+          
+          <TabsContent value="languages" className="space-y-4">
+            <LanguageManager />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

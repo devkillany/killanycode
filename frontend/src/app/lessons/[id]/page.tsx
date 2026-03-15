@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -13,28 +13,59 @@ import {
   Lightbulb, 
   BookOpen, 
   Clock,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from 'lucide-react';
 import Link from 'next/link';
-import { MOCK_LESSONS, MOCK_LANGUAGES } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
+import api from '@/lib/api';
 
 export default function LessonDetailsPage() {
   const { id } = useParams();
   const { t } = useTranslation();
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [lesson, setLesson] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const lesson = useMemo(() => MOCK_LESSONS.find(l => l.id === id), [id]);
-  const lang = useMemo(() => MOCK_LANGUAGES.find(l => l.id === lesson?.languageId), [lesson]);
+  useEffect(() => {
+    const fetchLesson = async () => {
+      try {
+        const response = await api.get(`/lessons/${id}`);
+        setLesson(response.data);
+      } catch (error) {
+        console.error('Failed to fetch lesson:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (id) fetchLesson();
+  }, [id]);
 
-  const handleAISummary = () => {
+  const handleAISummary = async () => {
+    if (!lesson) return;
     setIsSummarizing(true);
-    setTimeout(() => {
-      setAiSummary("This lesson covers the core concepts of Promises in JavaScript, explaining how they manage asynchronous tasks through pendings, fulfilled, and rejected states. Using Promises helps developers write cleaner and more manageable code compared to nested callbacks.");
+    try {
+      const response = await api.post('/ai/chat', {
+        message: `Write a very brief summary (2-3 sentences) of this technical lesson: ${lesson.title}\nContent: ${lesson.content.substring(0, 500)}`,
+        context: 'Platform Lesson Summary'
+      });
+      setAiSummary(response.data.reply);
+    } catch (error) {
+      console.error('AI summary failed:', error);
+      setAiSummary("Could not generate summary at this time.");
+    } finally {
       setIsSummarizing(false);
-    }, 1200);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="container flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!lesson) {
     return (
@@ -64,8 +95,8 @@ export default function LessonDetailsPage() {
         {/* Header */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className={cn("font-bold uppercase tracking-wider", lang?.color)}>
-              {lang?.name}
+            <Badge variant="outline" className="font-bold uppercase tracking-wider">
+              {lesson.language?.name || 'General'}
             </Badge>
             <Badge variant="secondary">{lesson.level}</Badge>
           </div>
@@ -115,41 +146,12 @@ export default function LessonDetailsPage() {
           </CardContent>
         </Card>
 
-        {/* Content Viewer (Simulated) */}
+        {/* Content Viewer */}
         <article className="prose prose-zinc dark:prose-invert max-w-none bg-card p-8 rounded-2xl border shadow-sm">
-          <div className="space-y-6">
-            <section className="space-y-4">
-              <h2 className="text-2xl font-bold">Introduction</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Asynchronous programming is a essential part of modern web development. Whether you're fetching data from an API, dealing with user input, or setting up timers, understanding how to manage long-running operations without blocking the main execution thread is vital.
-              </p>
-              <div className="p-4 bg-muted rounded-lg font-mono text-sm">
-                // The old way (Callback Hell)<br />
-                getData(function(a) {'{'}<br />
-                &nbsp;&nbsp;getMoreData(a, function(b) {'{'}<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;getEvenMoreData(b, function(c) {'{'}<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log(c);<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;{'}'});<br />
-                &nbsp;&nbsp;{'}'});<br />
-                {'}'});
-              </div>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-bold">Enter Promises</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                A Promise represents a value that might be available now, or in the future, or never. It provides a more structured way to handle these operations than callbacks.
-              </p>
-              <div className="p-4 bg-muted rounded-lg font-mono text-sm">
-                // The Promise way<br />
-                getData()<br />
-                &nbsp;&nbsp;.then(a =&gt; getMoreData(a))<br />
-                &nbsp;&nbsp;.then(b =&gt; getEvenMoreData(b))<br />
-                &nbsp;&nbsp;.then(c =&gt; console.log(c))<br />
-                &nbsp;&nbsp;.catch(err =&gt; console.error(err));
-              </div>
-            </section>
-          </div>
+          <div 
+            className="space-y-6"
+            dangerouslySetInnerHTML={{ __html: lesson.content }}
+          />
         </article>
 
         {/* Footer Navigation */}
