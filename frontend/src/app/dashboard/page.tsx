@@ -44,66 +44,135 @@ export default function DashboardPage() {
   }, [router]);
 
   return (
-    <div className="container px-4 py-8 md:py-12">
-      <div className="flex flex-col space-y-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-            <p className="text-muted-foreground">
-              Manage your platform content and monitor performance.
-            </p>
+    <div className="relative min-h-screen bg-grid-pattern pb-20 pt-32">
+      <div className="container px-4">
+        <div className="max-w-7xl mx-auto space-y-12">
+          
+          {/* ─── Dashboard Header ───────────────────────── */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-[10px] font-black uppercase tracking-widest">
+                 <LayoutDashboard className="h-3 w-3" /> System Root
+              </div>
+              <h1 className="text-5xl font-black tracking-tighter text-gradient leading-tight">
+                Admin Command Center
+              </h1>
+              <p className="text-xl text-muted-foreground/80 font-medium max-w-2xl">
+                Global orchestration of code assets, educational modules, and ecosystem parameters.
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+               <div className="flex -space-x-3">
+                  {[1,2,3].map(i => (
+                    <div key={i} className="h-10 w-10 rounded-full border-2 border-background bg-zinc-800 flex items-center justify-center text-[10px] font-black">
+                      OP
+                    </div>
+                  ))}
+                  <div className="h-10 w-10 rounded-full border-2 border-background bg-primary/20 text-primary flex items-center justify-center text-[10px] font-black">
+                    +5
+                  </div>
+               </div>
+               <div className="h-10 w-px bg-white/10 mx-2" />
+               <Button variant="outline" className="h-12 rounded-xl glass border-white/10 font-bold gap-2">
+                 <Settings className="h-4 w-4" /> Global Config
+               </Button>
+            </div>
           </div>
-        </div>
 
-        {/* Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard title="Platform Overview" value="Secure" change="All systems operational" icon={<LayoutDashboard className="h-4 w-4" />} />
-          <StatCard title="Admin Access" value="Granted" change="Logged in successfully" icon={<Users className="h-4 w-4" />} />
-          <StatCard title="Active Session" value="Now" change="Managing content" icon={<BarChart3 className="h-4 w-4" />} />
-          <StatCard title="System Mode" value="Active" change="CRUD functionality enabled" icon={<Settings className="h-4 w-4" />} />
-        </div>
+          {/* ─── Stats Grid ─────────────────────────────── */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <StatCard 
+              title="NETWORK STATUS" 
+              value="SECURE" 
+              description="ALL SYSTEMS VIGILANT" 
+              icon={<div className="p-2 rounded-lg bg-green-500/10 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]"><Globe className="h-5 w-5" /></div>} 
+              trend="+0ms latency"
+            />
+            <StatCard 
+              title="ACCESS VECTOR" 
+              value="ROOT" 
+              description="PRIVILEGED SESSION ACTIVE" 
+              icon={<div className="p-2 rounded-lg bg-primary/10 text-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]"><Users className="h-5 w-5" /></div>} 
+              trend="2FA Verified"
+            />
+            <StatCard 
+              title="THROUGHPUT" 
+              value="ACTIVE" 
+              description="PROCESSING REQUESTS" 
+              icon={<div className="p-2 rounded-lg bg-accent/10 text-accent shadow-[0_0_15px_rgba(var(--accent),0.2)]"><TrendingUp className="h-5 w-5" /></div>} 
+              trend="1.2k ops/s"
+            />
+            <StatCard 
+              title="COMPILER NODE" 
+              value="SYNCED" 
+              description="RTS ENABLED" 
+              icon={<div className="p-2 rounded-lg bg-zinc-800 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)]"><BarChart3 className="h-5 w-5" /></div>} 
+              trend="99.9% Uptime"
+            />
+          </div>
 
-        <Tabs defaultValue="snippets" className="space-y-4">
-          <TabsList className="bg-muted/50 p-1">
-            <TabsTrigger value="snippets" className="gap-2">
-              <FileCode className="h-4 w-4" /> Snippets
-            </TabsTrigger>
-            <TabsTrigger value="lessons" className="gap-2">
-              <GraduationCap className="h-4 w-4" /> Lessons
-            </TabsTrigger>
-            <TabsTrigger value="languages" className="gap-2">
-              <Globe className="h-4 w-4" /> Languages
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="snippets" className="space-y-4">
-            <SnippetManager />
-          </TabsContent>
-          
-          <TabsContent value="lessons" className="space-y-4">
-            <LessonManager />
-          </TabsContent>
-          
-          <TabsContent value="languages" className="space-y-4">
-            <LanguageManager />
-          </TabsContent>
-        </Tabs>
+          {/* ─── Management Interface ───────────────────── */}
+          <Tabs defaultValue="snippets" className="space-y-8">
+            <div className="flex items-center justify-between pb-4 border-b border-white/5">
+              <TabsList className="bg-white/5 p-1.5 rounded-2xl border border-white/5 backdrop-blur-xl h-14">
+                <TabsTrigger value="snippets" className="rounded-xl px-8 font-black text-xs uppercase tracking-widest gap-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:glow-primary transition-all">
+                  <FileCode className="h-4 w-4" /> Snippets
+                </TabsTrigger>
+                <TabsTrigger value="lessons" className="rounded-xl px-8 font-black text-xs uppercase tracking-widest gap-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:glow-primary transition-all">
+                  <GraduationCap className="h-4 w-4" /> Lessons
+                </TabsTrigger>
+                <TabsTrigger value="languages" className="rounded-xl px-8 font-black text-xs uppercase tracking-widest gap-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:glow-primary transition-all">
+                  <Globe className="h-4 w-4" /> Languages
+                </TabsTrigger>
+              </TabsList>
+              
+              <div className="hidden md:flex items-center gap-4">
+                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">Cluster: EU-CENTRAL-1</span>
+                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              </div>
+            </div>
+            
+            <div className="relative">
+              <div className="absolute -inset-4 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-[3rem] blur-2xl opacity-50" />
+              <TabsContent value="snippets" className="relative z-10 space-y-4 focus-visible:outline-none focus-visible:ring-0">
+                <SnippetManager />
+              </TabsContent>
+              
+              <TabsContent value="lessons" className="relative z-10 space-y-4 focus-visible:outline-none focus-visible:ring-0">
+                <LessonManager />
+              </TabsContent>
+              
+              <TabsContent value="languages" className="relative z-10 space-y-4 focus-visible:outline-none focus-visible:ring-0">
+                <LanguageManager />
+              </TabsContent>
+            </div>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
 }
 
-function StatCard({ title, value, change, icon }: { title: string; value: string; change: string; icon: React.ReactNode }) {
+function StatCard({ title, value, description, icon, trend }: { title: string; value: string; description: string; icon: React.ReactNode; trend: string }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <div className="text-muted-foreground">{icon}</div>
+    <Card className="group relative border border-white/5 bg-background/40 backdrop-blur-3xl rounded-[2.5rem] p-8 shadow-2xl transition-all duration-500 hover:border-primary/30 hover:-translate-y-2 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent" />
+      <CardHeader className="p-0 flex flex-row items-center justify-between mb-6 relative z-10">
+        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground group-hover:text-primary transition-colors">
+          {title}
+        </CardTitle>
+        {icon}
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">{change}</p>
+      <CardContent className="p-0 space-y-1 relative z-10">
+        <div className="text-4xl font-black tracking-tighter text-white group-hover:text-gradient transition-all">{value}</div>
+        <p className="text-xs font-bold text-muted-foreground/60 leading-tight uppercase tracking-widest">{description}</p>
+        <div className="pt-6 border-t border-white/5 mt-6 flex items-center justify-between">
+           <span className="text-[10px] font-black text-primary/60">{trend}</span>
+           <div className="flex gap-1">
+              {[1,2,3].map(i => <div key={i} className="h-1 w-3 rounded-full bg-primary/20" />)}
+           </div>
+        </div>
       </CardContent>
     </Card>
   );

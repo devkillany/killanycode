@@ -84,144 +84,183 @@ export default function SnippetDetailsPage() {
 
   if (isLoading) {
     return (
-      <div className="container flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex-1 flex items-center justify-center min-h-[60vh] bg-grid-pattern">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!snippet) {
     return (
-      <div className="container py-20 text-center">
-        <h2 className="text-2xl font-bold">Snippet not found</h2>
-        <Link 
-          href="/languages" 
-          className={cn(buttonVariants({ variant: 'default' }), "mt-4")}
-        >
-          Back to Languages
-        </Link>
+      <div className="relative min-h-screen bg-grid-pattern flex items-center justify-center pt-20">
+        <div className="text-center space-y-8 glass p-12 rounded-[3rem] border-white/5 shadow-2xl">
+          <h2 className="text-4xl font-black tracking-tighter text-gradient">Snippet Not Found</h2>
+          <p className="text-muted-foreground font-medium">The requested digital asset is missing or has been relocated.</p>
+          <Link 
+            href="/languages" 
+            className={cn(buttonVariants({ size: 'lg' }), "rounded-2xl h-14 px-10 glow-primary font-black")}
+          >
+            Back to Ecosystem
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container px-4 py-8 md:py-12">
-      <div className="flex flex-col space-y-6 max-w-5xl mx-auto">
-        {/* Back Button */}
-        <Link 
-          href={`/languages/${snippet.languageId}`} 
-          className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), "w-fit gap-1")}
-        >
-          <ChevronLeft className="h-4 w-4" /> Back to {snippet.language?.name}
-        </Link>
-
-        {/* Title and Stats */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">{snippet.title}</h1>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <User className="h-4 w-4" /> Eng. Mohamed Elkillany
+    <div className="relative min-h-screen bg-grid-pattern pb-20 pt-32">
+      <div className="container px-4">
+        <div className="max-w-6xl mx-auto space-y-10">
+          
+          {/* ─── Navigation & Meta ───────────────────────── */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div className="space-y-6">
+              <Link 
+                href={`/languages/${snippet.languageId}`} 
+                className="inline-flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-widest hover:translate-x-1 transition-transform"
+              >
+                <ChevronLeft className="h-4 w-4" /> RECURSIVE BACK TO {snippet.language?.name}
+              </Link>
+              <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-white leading-tight">
+                {snippet.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground/80 font-medium">
+                <span className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" /> Eng. Mohamed Elkillany
+                </span>
+                <span className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-accent" /> {new Date(snippet.createdAt).toLocaleDateString()}
+                </span>
+                <Badge variant="outline" className="rounded-full px-3 py-1 border-white/5 bg-white/5 text-[10px] font-black uppercase text-primary tracking-widest">
+                  OPTIMIZED v2.0
+                </Badge>
               </div>
-              <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" /> {new Date(snippet.createdAt).toLocaleDateString()}
-              </div>
-              <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
-                Optimized
-              </Badge>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Button size="lg" variant="outline" onClick={copyToClipboard} className="h-14 px-8 rounded-2xl glass border-white/10 font-bold gap-3 hover:bg-primary/5">
+                {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
+                {copied ? 'BUFFER COPIED' : 'CLONE CODE'}
+              </Button>
+              <Button size="lg" variant="outline" className="h-14 w-14 rounded-2xl glass border-white/10 flex items-center justify-center p-0">
+                <Share2 className="h-5 w-5" />
+              </Button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={copyToClipboard} className="gap-2">
-              {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-              {copied ? 'Copied' : 'Copy'}
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Share2 className="h-4 w-4" /> Share
-            </Button>
-          </div>
-        </div>
 
-        <p className="text-lg text-muted-foreground">{snippet.description}</p>
-
-        {/* Code Block */}
-        <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
-          <div className="bg-muted/50 px-4 py-2 border-b flex justify-between items-center">
-            <span className="text-xs font-mono uppercase tracking-widest">{snippet.language?.name}</span>
-            <Link href="/compiler">
-              <Button size="xs" variant="secondary" className="h-7 text-[10px] uppercase font-bold gap-1">
-                <Play className="h-3 w-3" /> Run in Compiler
-              </Button>
-            </Link>
-          </div>
-          <div className="h-[400px]">
-            <Editor
-              height="100%"
-              language={snippet.language?.name?.toLowerCase() || 'javascript'}
-              defaultValue={snippet.code}
-              theme={theme === 'dark' ? 'vs-dark' : 'light'}
-              options={{
-                readOnly: true,
-                minimap: { enabled: false },
-                fontSize: 14,
-                padding: { top: 16, bottom: 16 },
-                scrollBeyondLastLine: false,
-                lineNumbers: 'on',
-              }}
-            />
-          </div>
-        </div>
-
-        {/* AI & Interaction Sections */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-primary/20 bg-primary/5">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Sparkles className="h-5 w-5 text-primary" />
-                AI Code Assistant
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm">
-                Get an instant explanation or optimization suggestions for this snippet powered by AI.
+          {/* ─── Code Ecosystem ─────────────────────────── */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            
+            <div className="lg:col-span-2 space-y-8">
+              <p className="text-xl text-muted-foreground leading-relaxed font-medium">
+                {snippet.description}
               </p>
-              <div className="flex gap-2">
-                <Button size="sm" onClick={handleAIExplain} disabled={isExplaining}>
-                  {isExplaining ? 'Thinking...' : 'Explain Code'}
-                </Button>
-                <Button size="sm" variant="outline">
-                  Improve Code
-                </Button>
-              </div>
               
-              {explanation && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="mt-4 p-4 rounded-lg bg-background border text-sm italic"
-                >
-                  {explanation}
-                </motion.div>
-              )}
-            </CardContent>
-          </Card>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="group relative rounded-[2.5rem] border border-white/5 bg-black/90 shadow-[0_32px_128px_-12px_rgba(0,0,0,0.8)] overflow-hidden"
+              >
+                <div className="bg-zinc-900/50 px-8 py-5 border-b border-white/5 flex justify-between items-center backdrop-blur-md">
+                   <div className="flex items-center gap-3">
+                      <div className="flex gap-2 mr-4">
+                        <div className="h-3 w-3 rounded-full bg-red-500/30" />
+                        <div className="h-3 w-3 rounded-full bg-yellow-500/30" />
+                        <div className="h-3 w-3 rounded-full bg-green-500/30" />
+                      </div>
+                      <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                        {snippet.language?.name} KERNEL
+                      </span>
+                   </div>
+                   <Link href="/compiler">
+                     <Button size="sm" variant="secondary" className="rounded-xl h-10 px-6 text-[10px] font-black uppercase tracking-widest gap-2 bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white transition-all">
+                       <Play className="h-3 w-3 fill-current" /> RUN IN COMPILER
+                     </Button>
+                   </Link>
+                </div>
+                <div className="h-[500px] relative">
+                  <Editor
+                    height="100%"
+                    language={snippet.language?.name?.toLowerCase() || 'javascript'}
+                    defaultValue={snippet.code}
+                    theme="vs-dark"
+                    options={{
+                      readOnly: true,
+                      minimap: { enabled: true },
+                      fontSize: 16,
+                      padding: { top: 32, bottom: 32 },
+                      scrollBeyondLastLine: false,
+                      fontFamily: 'var(--font-mono)',
+                      renderLineHighlight: 'all',
+                      lineNumbers: 'on',
+                    }}
+                  />
+                </div>
+              </motion.div>
+            </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <MessageSquareText className="h-5 w-5 text-blue-500" />
-                Discussion
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center py-8 text-center space-y-2">
-              <p className="text-sm text-muted-foreground italic">
-                Currently, comments are disabled. Join our community to discuss this!
-              </p>
-              <Button variant="link" size="sm">
-                Join Community
-              </Button>
-            </CardContent>
-          </Card>
+            {/* AI Sidebar */}
+            <div className="space-y-8">
+              <Card className="border border-white/5 bg-background/40 backdrop-blur-3xl rounded-[2.5rem] p-8 shadow-2xl overflow-hidden relative group">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-50" />
+                <CardHeader className="p-0 mb-6 relative z-10">
+                  <CardTitle className="text-2xl font-black flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-primary/10 text-primary glow-primary"><Sparkles className="h-6 w-6" /></div>
+                    Neural Assistant
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0 space-y-6 relative z-10">
+                  <p className="text-sm font-medium text-muted-foreground/80 leading-relaxed">
+                    Instantly analyze architecture, logic flow, and optimization vectors using our Google AI core.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <Button 
+                      className="w-full h-14 rounded-2xl glow-primary font-black tracking-tight gap-3 shadow-lg group-active:scale-95 transition-all"
+                      onClick={handleAIExplain} 
+                      disabled={isExplaining}
+                    >
+                      {isExplaining ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+                      {isExplaining ? 'DECODING LOGIC...' : 'ANALYZE SYNTAX'}
+                    </Button>
+                    <Button variant="outline" className="w-full h-14 rounded-2xl glass border-white/10 font-bold hover:bg-primary/5">
+                      Suggest Refactor
+                    </Button>
+                  </div>
+                  
+                  {explanation && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-6 rounded-3xl bg-black/40 border border-white/5 text-sm font-mono leading-relaxed text-primary/90 italic shadow-inner"
+                    >
+                      {explanation}
+                      <span className="inline-block w-2 h-4 bg-primary/50 ml-1 animate-pulse" />
+                    </motion.div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="border border-white/5 bg-background/40 backdrop-blur-3xl rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 blur-3xl rounded-full" />
+                 <CardHeader className="p-0 mb-6">
+                    <CardTitle className="text-2xl font-black flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-accent/10 text-accent"><MessageSquareText className="h-6 w-6" /></div>
+                      Discussion
+                    </CardTitle>
+                 </CardHeader>
+                 <CardContent className="p-0 text-center space-y-4">
+                    <p className="text-sm text-muted-foreground font-medium italic">
+                      Neural interface for community feedback is currently in read-only mode for this cluster.
+                    </p>
+                    <Button variant="link" className="text-primary font-black uppercase text-[10px] tracking-widest p-0 h-fit hover:underline-offset-4">
+                      JOIN THE DEVELOPER GUILD
+                    </Button>
+                 </CardContent>
+              </Card>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>

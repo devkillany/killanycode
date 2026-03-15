@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Mail, Lock, ArrowRight, UserPlus } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, UserPlus, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -56,92 +56,108 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="container flex items-center justify-center min-h-[calc(100vh-8rem)] py-12">
+    <div className="relative min-h-[calc(100vh-5rem)] bg-grid-pattern flex items-center justify-center p-4">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md"
+        initial={{ opacity: 0, scale: 0.95, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ type: 'spring' as const, stiffness: 100 }}
+        className="w-full max-w-lg relative"
       >
-        <Card className="border-primary/20 shadow-xl overflow-hidden bg-background/50 backdrop-blur-sm">
-          <div className="h-1.5 bg-gradient-to-r from-primary to-blue-600 w-full" />
-          <CardHeader className="space-y-1 text-center">
-            <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-4">
-              <UserPlus className="h-8 w-8 text-primary" />
+        <div className="absolute -inset-1 bg-gradient-to-r from-accent via-primary to-accent rounded-[3rem] blur-2xl opacity-20 animate-pulse" />
+        
+        <Card className="relative border-white/5 bg-background/40 backdrop-blur-3xl rounded-[3rem] shadow-2xl overflow-hidden p-8 md:p-12">
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent" />
+          
+          <CardHeader className="space-y-6 text-center pb-10">
+            <div className="mx-auto p-4 rounded-3xl bg-accent/10 border border-accent/20 w-fit glow-accent">
+              <UserPlus className="h-10 w-10 text-accent" />
             </div>
-            <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-            <CardDescription>
-              Join the KillanyCode community today.
-            </CardDescription>
+            <div className="space-y-2">
+              <CardTitle className="text-4xl font-black tracking-tighter text-gradient-alt leading-tight">Neural Enrollment</CardTitle>
+              <CardDescription className="text-lg font-medium text-muted-foreground/80 leading-relaxed">
+                Register your unique signature within the KillanyCode global network.
+              </CardDescription>
+            </div>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div className="space-y-2">
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+
+          <CardContent className="p-0">
+            <form onSubmit={handleRegister} className="space-y-5">
+              <div className="space-y-4">
+                <div className="group relative">
+                  <User className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
                   <Input 
                     name="name"
                     type="text" 
-                    placeholder="Full Name" 
-                    className="pl-10"
+                    placeholder="Full Signature Name" 
+                    className="pl-14 h-16 rounded-2xl border-white/5 bg-background/50 backdrop-blur-xl font-bold transition-all focus-visible:ring-accent/20"
                     required
                     value={formData.name}
                     onChange={handleChange}
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="group relative">
+                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <Input 
                     name="email"
                     type="email" 
-                    placeholder="Email Address" 
-                    className="pl-10"
+                    placeholder="E-mail Vector" 
+                    className="pl-14 h-16 rounded-2xl border-white/5 bg-background/50 backdrop-blur-xl font-bold transition-all focus-visible:ring-primary/20"
                     required
                     value={formData.email}
                     onChange={handleChange}
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="group relative">
+                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
                   <Input 
                     name="password"
                     type="password" 
-                    placeholder="Password" 
-                    className="pl-10"
+                    placeholder="Access Key" 
+                    className="pl-14 h-16 rounded-2xl border-white/5 bg-background/50 backdrop-blur-xl font-bold transition-all focus-visible:ring-accent/20"
                     required
                     value={formData.password}
                     onChange={handleChange}
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="group relative">
+                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
                   <Input 
                     name="confirmPassword"
                     type="password" 
-                    placeholder="Confirm Password" 
-                    className="pl-10"
+                    placeholder="Verify Access Key" 
+                    className="pl-14 h-16 rounded-2xl border-white/5 bg-background/50 backdrop-blur-xl font-bold transition-all focus-visible:ring-accent/20"
                     required
                     value={formData.confirmPassword}
                     onChange={handleChange}
                   />
                 </div>
+                {error && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs font-black uppercase tracking-widest text-destructive text-center bg-destructive/5 p-4 rounded-xl border border-destructive/10"
+                  >
+                    {error}
+                  </motion.div>
+                )}
               </div>
-              {error && <p className="text-xs text-destructive font-medium text-center">{error}</p>}
-              <Button type="submit" className="w-full h-11 gap-2 text-base mt-2" disabled={isLoading}>
-                {isLoading ? 'Creating account...' : 'Sign Up'} <ArrowRight className="h-4 w-4" />
+              
+              <Button 
+                type="submit" 
+                className="w-full h-16 rounded-2xl glow-accent bg-accent text-accent-foreground font-black tracking-tight flex items-center justify-center gap-3 text-lg group-active:scale-95 transition-all shadow-xl hover:bg-accent/90 mt-4" 
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <ArrowRight className="h-5 w-5" />}
+                {isLoading ? 'SYNCING DATA...' : 'REALIZE ENROLLMENT'}
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4 pt-0">
-            <div className="text-sm text-center text-muted-foreground">
-              Already have an account?{' '}
-              <Link href="/login" className="text-primary hover:underline font-medium">
-                Log In
+
+          <CardFooter className="p-0 pt-10 flex flex-col space-y-6 border-t border-white/5 mt-10">
+            <div className="text-center w-full">
+              <span className="text-sm font-medium text-muted-foreground">Existing Operative? </span>
+              <Link href="/login" className="text-accent hover:text-accent-foreground hover:bg-accent/10 px-3 py-1 rounded-lg transition-all font-black uppercase text-xs tracking-widest">
+                 Log In
               </Link>
             </div>
           </CardFooter>
